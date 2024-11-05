@@ -1,32 +1,47 @@
-// src/App.jsx
-import React from 'react';
-import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { BrowserRouter as Router, Route, Routes, Navigate, useLocation } from 'react-router-dom';
+import { Provider } from 'react-redux';
+import store from './redux/store';
 import Navbar from './components/Navbar';
 import Login from './components/Login';
 import Register from './components/Register';
 import ProductList from './components/ProductList';
 import AddProduct from './components/AddProduct';
-import ProtectedRoute from './components/ProtectedRoute'; // Make sure this is correctly set up
+import ProtectedRoute from './components/ProtectedRoute';
+import './app.css'; 
 
 const App = () => {
+  const location = useLocation();
+
+  useEffect(() => {
+    localStorage.setItem('currentPath', location.pathname);
+  }, [location]);
+
   return (
-    <Router>
+    <Provider store={store}>
       <Navbar />
       <Routes>
-        {/* Redirect root path to login page */}
         <Route path="/" element={<Navigate to="/login" />} />
-        
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        
-        {/* Protecting Product Routes */}
         <Route element={<ProtectedRoute />}>
           <Route path="/products" element={<ProductList />} />
           <Route path="/add-product" element={<AddProduct />} />
         </Route>
       </Routes>
+    </Provider>
+  );
+};
+
+const AppWrapper = () => {
+  // Get the path from local storage
+  const savedPath = localStorage.getItem('currentPath') || '/login';
+
+  return (
+    <Router initialEntries={[savedPath]}>
+      <App />
     </Router>
   );
 };
 
-export default App;
+export default AppWrapper;

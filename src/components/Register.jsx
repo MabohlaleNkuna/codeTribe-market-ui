@@ -1,54 +1,63 @@
-// src/components/Register.js
 import React, { useState } from 'react';
-import axios from 'axios';
+import { useDispatch } from 'react-redux';
+import { registerUser } from '../redux/authSlice';
+
 
 const Register = () => {
+  const dispatch = useDispatch();
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError(null);
+    setSuccess(null);
+
     try {
-      await axios.post('http://localhost:5000/auth/register', {
-        username,
-        email,
-        password,
-      });
-      alert('Registration successful!');
-      window.location.href = '/login'; // Redirect to login
+      await dispatch(registerUser({ username, email, password })).unwrap();
+      setSuccess('Registration successful! Please login.');
+      setTimeout(() => {
+        window.location.href = '/login'; 
+      }, 2000);
     } catch (error) {
       console.error(error);
-      alert('Registration failed!');
+      setError('Registration failed! Please try again.');
     }
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <h2>Register</h2>
-      <input 
-        type="text" 
-        placeholder="Username" 
-        value={username} 
-        onChange={(e) => setUsername(e.target.value)} 
-        required 
-      />
-      <input 
-        type="email" 
-        placeholder="Email" 
-        value={email} 
-        onChange={(e) => setEmail(e.target.value)} 
-        required 
-      />
-      <input 
-        type="password" 
-        placeholder="Password" 
-        value={password} 
-        onChange={(e) => setPassword(e.target.value)} 
-        required 
-      />
-      <button type="submit">Register</button>
-    </form>
+    <div className="register-container">
+      <form onSubmit={handleSubmit} className="form">
+        <h2>Register</h2>
+        {error && <div className="error">{error}</div>}
+        {success && <div className="success">{success}</div>}
+        <input 
+          type="text" 
+          placeholder="Username" 
+          value={username} 
+          onChange={(e) => setUsername(e.target.value)} 
+          required 
+        />
+        <input 
+          type="email" 
+          placeholder="Email" 
+          value={email} 
+          onChange={(e) => setEmail(e.target.value)} 
+          required 
+        />
+        <input 
+          type="password" 
+          placeholder="Password" 
+          value={password} 
+          onChange={(e) => setPassword(e.target.value)} 
+          required 
+        />
+        <button type="submit">Register</button>
+      </form>
+    </div>
   );
 };
 
